@@ -1,81 +1,67 @@
-<!DOCTYPE html>
 <html lang="pt-BR">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="./lib/opencv.min.js"></script>
-  <title>OpenCV JS</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenCV JS</title>
+    <script async src="lib/opencv.js" onload="openCvReady();"></script>
+    <script src="js/utils.js"></script>
 </head>
 
 <body>
-  <video id="webcam" width="480px" height="320px"></video>
-  <canvas id="canvas" width="480px" height="320px"></canvas>
-
-  <script>
-    const webcam = document.getElementById('webcam');
-    const canvas = document.getElementById('canvas');
-    let imagemOriginal = new cv.Mat(webcam.height, webcam.width, cv.CV_8UC4);
-    let imagemProcessada = new cv.Mat(webcam.height, webcam.width, cv.CV_8UC4);
-    let imagemCinza = new cv.Mat();
-    let capturaVideo = new cv.VideoCapture(webcam);
-    let rostos = new cv.RectVector();
-    let classificadorRosto = new cv.CascadeClassifier();
-    classificadorRosto.load('./haarcascades/haarcascade_frontalface_default.xml');
-
-    (async () => {
-
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: true,
-        audio: false
-      });
-
-      let imagemOriginal = new cv.Mat(webcam.height, webcam.width, cv.CV_8UC4);
-      let capturaVideo = new cv.VideoCapture(webcam);
-
-      webcam.srcObject = stream;
-      webcam.play();
-
-      const FPS = 30;
-
-      function processarVideo() {
-        try {
-          if (!stream) {
-            // Para os processos se o stream for encerrado.
-            imagemOriginal.delete();
-            imagemProcessada.delete();
-            imagemCinza.delete();
-            rostos.delete();
-            classificadorRosto.delete();
-            return;
-          }
-          let inicio = Date.now();
-          // Iniciar o processamento.
-          capturaVideo.read(imagemOriginal);
-          imagemOriginal.copyTo(imagemProcessada);
-          cv.cvtColor(imagemProcessada, imagemCinza, cv.COLOR_RGBA2GRAY, 0);
-          //Reconhecimento de rosto
-          // -> (BUG) classificadorRosto.detectMultiScale(imagemCinza, rostos, 1.1, 3, 0);
-          // Desenhar retângulos nos rostos.
-          for (let i = 0; i < rostos.size(); ++i) {
-            let rosto = rostos.get(i);
-            let ponto1 = new cv.Point(rosto.x, rosto.y);
-            let ponto2 = new cv.Point(rosto.x + rosto.width, rosto.y + rosto.height);
-            cv.rectangle(imagemProcessada, ponto1, ponto2, [255, 0, 0, 255]);
-          }
-          cv.imshow('canvas', imagemProcessada);
-          // Calcula o tempo para o próximo processamento.
-          let atraso = 1000 / FPS - (Date.now() - inicio);
-          setTimeout(processarVideo, atraso);
-        } catch (err) {
-          console.log(err);
-        }
-      };
-
-      // Iniciar o processamento.
-      setTimeout(processarVideo, 0);
-    })();
-  </script>
+    <video id="camera" width="640" height="480" style="object-fit: cover;"></video>
+    <canvas id="canvas" style="width: 640px; height: 480px;"></canvas>
 </body>
+<script type="text/JavaScript">
+function openCvReady() {
+  cv['onRuntimeInitialized'] = () => {
+    let video = document.getElementById("camera");
+    navigator.mediaDevices.getUserMedia({ video: true, audio: false })
+    .then(function(stream) {
+        video.srcObject = stream;
+        video.play();
+    })
+    .catch(function(err) {
+        console.log("Ocorreu um erro! " + err);
+    });
+    let src = new cv.Mat(video.height, video.width, cv.CV_8UC4);
+    let dst = new cv.Mat(video.height, video.width, cv.CV_8UC1);
+    let gray = new cv.Mat();
+    let cap = new cv.VideoCapture(camera);
+    let faces = new cv.RectVector();
+    let classifier = new cv.CascadeClassifier();
+    let utils = new Utils('mensagem_erro');
+    let faceCascadeFile = 'haarcascade_frontalface_default.xml'; // caminho para o arquivo XML
+    utils.createFileFromUrl(faceCascadeFile, faceCascadeFile, () => {
+    classifier.load(faceCascadeFile); // no retorno, carregue o cascade do arquivo 
+});
+    const FPS = 30;
+    function processVideo() {
+        let begin = Date.now();
+        cap.read(src);
+        src.copyTo(dst);
+        cv.cvtColor(dst, gray, cv.COLOR_RGBA2GRAY, 0);
+        try{
+            classifier.detectMultiScale(gray, faces, 1.1, 3, 0);
+            console.log(faces.size());
+        }catch(err){
+            console.log(err);
+        }
+        for (let i = 0; i < faces.size(); ++i) {
+            let face = faces.get(i);
+            let ponto1 = new cv.Point(face.x, face.y);
+            let ponto2 = new cv.Point(face.x + face.width, face.y + face.height);
+            cv.rectangle(dst, ponto1, ponto2, [255, 0, 0, 255]);
+        }
+        cv.imshow("canvas", dst);
+        // agende o próximo.
+        let delay = 1000/FPS - (Date.now() - begin);
+        setTimeout(processVideo, delay);
+}
+// agende o primeiro.
+setTimeout(processVideo, 0);
+  };
+}
+</script>
 
 </html>
