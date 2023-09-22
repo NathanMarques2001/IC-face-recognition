@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="pt-BR">
 
 <head>
@@ -14,53 +15,78 @@
 </body>
 <script type="text/JavaScript">
 function openCvReady() {
-  cv['onRuntimeInitialized'] = () => {
-    let video = document.getElementById("camera");
-    navigator.mediaDevices.getUserMedia({ video: true, audio: false })
-    .then(function(stream) {
-        video.srcObject = stream;
-        video.play();
-    })
-    .catch(function(err) {
-        console.log("Ocorreu um erro! " + err);
-    });
-    let src = new cv.Mat(video.height, video.width, cv.CV_8UC4);
-    let dst = new cv.Mat(video.height, video.width, cv.CV_8UC1);
-    let gray = new cv.Mat();
-    let cap = new cv.VideoCapture(camera);
-    let faces = new cv.RectVector();
-    let classifier = new cv.CascadeClassifier();
-    let utils = new Utils('mensagem_erro');
-    let faceCascadeFile = 'haarcascade_frontalface_default.xml'; // caminho para o arquivo XML
-    utils.createFileFromUrl(faceCascadeFile, faceCascadeFile, () => {
-    classifier.load(faceCascadeFile); // no retorno, carregue o cascade do arquivo 
-});
-    const FPS = 30;
-    function processVideo() {
-        let begin = Date.now();
-        cap.read(src);
-        src.copyTo(dst);
-        cv.cvtColor(dst, gray, cv.COLOR_RGBA2GRAY, 0);
-        try{
-            classifier.detectMultiScale(gray, faces, 1.1, 3, 0);
-            console.log(faces.size());
-        }catch(err){
-            console.log(err);
+    cv['onRuntimeInitialized'] = () => {
+        const elementoVideo = document.getElementById("camera");
+        navigator.mediaDevices.getUserMedia({ video: true, audio: false })
+        .then(function(stream) {
+            elementoVideo.srcObject = stream;
+            elementoVideo.play();
+        })
+        .catch(function(err) {
+            console.log("Ocorreu um erro! " + err);
+        });
+        
+        const matrizEntrada = new cv.Mat(elementoVideo.height, elementoVideo.width, cv.CV_8UC4);
+        const matrizSaida = new cv.Mat(elementoVideo.height, elementoVideo.width, cv.CV_8UC1);
+        const matrizCinza = new cv.Mat();
+        const capturaVideo = new cv.VideoCapture(camera);
+        const rostos = new cv.RectVector();
+        const classificadorRosto = new cv.CascadeClassifier();
+        const utilidades = new Utils('mensagem_erro');
+        
+        const arquivoCascataRosto = 'haarcascade_frontalface_default.xml';
+        utilidades.criarArquivoAPartirDeUrl(arquivoCascataRosto, arquivoCascataRosto, () => {
+            classificadorRosto.load(arquivoCascataRosto); // Carregue o cascata do arquivo 
+        });
+
+        const arquivoCascataOlhos = 'haarcascade_eye.xml'; // Nome do arquivo XML para os olhos
+        const classificadorOlhos = new cv.CascadeClassifier(); // Crie o classificador para os olhos
+        utilidades.criarArquivoAPartirDeUrl(arquivoCascataOlhos, arquivoCascataOlhos, () => {
+            classificadorOlhos.load(arquivoCascataOlhos); // Carregue o cascata do arquivo para os olhos
+        });
+
+        const FPS = 30;
+        function processarVideo() {
+            let inicio = Date.now();
+            capturaVideo.read(matrizEntrada);
+            matrizEntrada.copyTo(matrizSaida);
+            cv.cvtColor(matrizSaida, matrizCinza, cv.COLOR_RGBA2GRAY, 0);
+            try {
+                classificadorRosto.detectMultiScale(matrizCinza, rostos, 1.1, 3, 0);
+                console.log(rostos.size());
+
+                for (let i = 0; i < rostos.size(); ++i) {
+                    let roiMatrizCinza = matrizCinza.roi(rostos.get(i));
+                    let roiMatrizSrc = matrizEntrada.roi(rostos.get(i));
+                    let ponto1 = new cv.Point(rostos.get(i).x, rostos.get(i).y);
+                    let ponto2 = new cv.Point(rostos.get(i).x + rostos.get(i).width,
+                                              rostos.get(i).y + rostos.get(i).height);
+                    cv.rectangle(matrizSaida, ponto1, ponto2, [255, 0, 0, 255]);
+
+                    // Ajuste das coordenadas dos retângulos dos olhos para a posição correta na imagem completa
+                    let olhos = new cv.RectVector();
+                    classificadorOlhos.detectMultiScale(roiMatrizCinza, olhos);
+                    for (let j = 0; j < olhos.size(); ++j) {
+                        let olho = olhos.get(j);
+                        let pontoOlho1 = new cv.Point(rostos.get(i).x + olho.x, rostos.get(i).y + olho.y);
+                        let pontoOlho2 = new cv.Point(rostos.get(i).x + olho.x + olho.width, rostos.get(i).y + olho.y + olho.height);
+                        cv.rectangle(matrizSaida, pontoOlho1, pontoOlho2, [0, 0, 255, 255]);
+                    }
+                    roiMatrizCinza.delete(); roiMatrizSrc.delete();
+                }
+                cv.imshow("canvas", matrizSaida);
+            } catch (err) {
+                console.log(err);
+            }
+
+            // Agende o próximo frame.
+            let atraso = 1000 / FPS - (Date.now() - inicio);
+            setTimeout(processarVideo, atraso);
         }
-        for (let i = 0; i < faces.size(); ++i) {
-            let face = faces.get(i);
-            let ponto1 = new cv.Point(face.x, face.y);
-            let ponto2 = new cv.Point(face.x + face.width, face.y + face.height);
-            cv.rectangle(dst, ponto1, ponto2, [255, 0, 0, 255]);
-        }
-        cv.imshow("canvas", dst);
-        // agende o próximo.
-        let delay = 1000/FPS - (Date.now() - begin);
-        setTimeout(processVideo, delay);
-}
-// agende o primeiro.
-setTimeout(processVideo, 0);
-  };
+
+        // Agende o primeiro frame.
+        setTimeout(processarVideo, 0);
+    };
 }
 </script>
 
