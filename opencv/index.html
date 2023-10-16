@@ -12,8 +12,13 @@
 <body>
     <video id="camera" width="640" height="480" style="object-fit: cover;"></video>
     <canvas id="canvas" style="width: 640px; height: 480px;"></canvas>
+    <button onclick="capturarFoto()">Capturar Foto</button>
 </body>
+
 <script type="text/JavaScript">
+let primeiroVetor = null;
+let segundoVetor = null;
+
 function openCvReady() {
     cv['onRuntimeInitialized'] = () => {
         const elementoVideo = document.getElementById("camera");
@@ -28,25 +33,79 @@ function openCvReady() {
         
         const matrizEntrada = new cv.Mat(elementoVideo.height, elementoVideo.width, cv.CV_8UC4);
         const matrizSaida = new cv.Mat(elementoVideo.height, elementoVideo.width, cv.CV_8UC1);
-        const matrizCinza = new cv.Mat();
         const capturaVideo = new cv.VideoCapture(camera);
-        const rostos = new cv.RectVector();
         const classificadorRosto = new cv.CascadeClassifier();
-        const utilidades = new Utils('mensagem_erro');
-        
+
         const arquivoCascataRosto = 'haarcascade_frontalface_default.xml';
         utilidades.criarArquivoAPartirDeUrl(arquivoCascataRosto, arquivoCascataRosto, () => {
-            classificadorRosto.load(arquivoCascataRosto); // Carregue o cascata do arquivo 
-        });
-
-        const arquivoCascataOlhos = 'haarcascade_eye.xml'; // Nome do arquivo XML para os olhos
-        const classificadorOlhos = new cv.CascadeClassifier(); // Crie o classificador para os olhos
-        utilidades.criarArquivoAPartirDeUrl(arquivoCascataOlhos, arquivoCascataOlhos, () => {
-            classificadorOlhos.load(arquivoCascataOlhos); // Carregue o cascata do arquivo para os olhos
+            classificadorRosto.load(arquivoCascataRosto);
         });
 
         const FPS = 30;
+
+        function capturarCaracteristicas(matrizCinza) {
+            // Implemente a lógica para extrair as características do rosto
+            // e retorne o vetor de características
+            let vetorCaracteristicas = []; // Substitua isso com as verdadeiras características
+            return vetorCaracteristicas;
+        }
+
+        function capturarFoto() {
+            if (primeiroVetor !== null) {
+                console.log("Já foi capturado um rosto. Não é possível capturar outra foto.");
+                return;
+            }
+
+            let canvas = document.getElementById("canvas");
+            let contexto = canvas.getContext("2d");
+            contexto.drawImage(elementoVideo, 0, 0, canvas.width, canvas.height);
+
+            let imagemCapturada = new cv.Mat(canvas.height, canvas.width, cv.CV_8UC4);
+            cv.imshow(imagemCapturada, canvas);
+            let imagemCinza = new cv.Mat();
+            cv.cvtColor(imagemCapturada, imagemCinza, cv.COLOR_RGBA2GRAY);
+
+            let rostosCapturados = new cv.RectVector();
+            classificadorRosto.detectMultiScale(imagemCinza, rostosCapturados, 1.1, 3, 0);
+
+            if (rostosCapturados.size() === 1) {
+                let roiMatrizCinza = imagemCinza.roi(rostosCapturados.get(0));
+                let vetorCaracteristicas = capturarCaracteristicas(roiMatrizCinza);
+
+                if (primeiroVetor === null) {
+                    primeiroVetor = vetorCaracteristicas;
+                    console.log("Foto capturada e vetor de características gerado.");
+                } else {
+                    segundoVetor = vetorCaracteristicas;
+                    console.log("Segundo vetor de características gerado.");
+
+                    let distancia = euclideanDistance(primeiroVetor, segundoVetor);
+                    console.log("Distância entre os vetores de características:", distancia);
+
+                    let limiar = 100; // Ajuste conforme necessário
+                    if (distancia < limiar) {
+                        console.log("Os vetores correspondem!");
+                    } else {
+                        console.log("Os vetores não correspondem.");
+                    }
+                }
+
+                roiMatrizCinza.delete();
+            } else {
+                console.log("Nenhum rosto ou mais de um rosto detectado na foto. Tente novamente.");
+            }
+
+            imagemCapturada.delete();
+            imagemCinza.delete();
+            rostosCapturados.delete();
+        }
+
         function processarVideo() {
+            let inicio = Date.now();
+            capturaVideo.read(matrizEntrada);
+            matrizEntrada.copyTo(matrizSaida);
+
+            function processarVideo() {
             let inicio = Date.now();
             capturaVideo.read(matrizEntrada);
             matrizEntrada.copyTo(matrizSaida);
@@ -79,14 +138,15 @@ function openCvReady() {
                 console.log(err);
             }
 
-            // Agende o próximo frame.
+            cv.imshow("canvas", matrizSaida);
+
             let atraso = 1000 / FPS - (Date.now() - inicio);
             setTimeout(processarVideo, atraso);
         }
 
-        // Agende o primeiro frame.
         setTimeout(processarVideo, 0);
     };
+}
 }
 </script>
 

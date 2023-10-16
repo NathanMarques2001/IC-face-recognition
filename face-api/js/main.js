@@ -1,5 +1,10 @@
 const webcam = document.querySelector('#webcam')
 
+let face1 = null;
+let face2 = null;
+let response = null;
+let arrayPreenchido = false;
+
 //Após todas as promises resolvidas starta o vídeo
 Promise.all([
 
@@ -44,6 +49,24 @@ webcam.addEventListener('play', () => {
     )
       .withFaceLandmarks() // Vai desenhar os pontos de marcação no rosto
 
+    if (detections[0] != undefined && response === null) {
+      console.log(detections[0])
+      let response = detections[0].landmarks._positions;
+
+      if (face1 === null) {
+        face1 = [...response];
+      } else if (face2 === null) {
+        face2 = [...response];
+      }
+
+      if (face1 != null && face2 != null && !arrayPreenchido) {
+        console.log(await faceapi.euclideanDistance(face1, face2));
+        arrayPreenchido = true;
+      }
+    }
+
+   // console.log(detections[0]["detection"]["_box"])
+    console.log(faceapi.euclideanDistance(detections[0]["detection"]["_box"]["_x"], detections[0]["detection"]["_box"]["_y"]))
 
     const resizedDetections = faceapi.resizeResults(detections, displaySize) // Redimensionado as detecções
 
