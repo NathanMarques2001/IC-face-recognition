@@ -1,13 +1,9 @@
-// main.js
-
 document.addEventListener('DOMContentLoaded', () => {
   const inputImage1 = document.getElementById('inputImage1');
   const imageDisplay1 = document.getElementById('imageDisplay1');
   const inputImage2 = document.getElementById('inputImage2');
   const imageDisplay2 = document.getElementById('imageDisplay2');
   const compareBtn = document.getElementById('compareBtn');
-  const canvas = document.getElementById('canvas');
-  const context = canvas.getContext('2d');
 
   let image1;
   let image2;
@@ -44,30 +40,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
   compareBtn.addEventListener('click', async () => {
     if (image1 && image2) {
-      // Certifique-se de que todos os modelos necessários sejam carregados
+      // Modelos necessáios para detecção de rostos e pontos de referência
       await faceapi.nets.ssdMobilenetv1.loadFromUri('./models');
       await faceapi.nets.faceRecognitionNet.loadFromUri('./models');
       await faceapi.nets.faceLandmark68Net.loadFromUri('./models');
 
-      // Detectar rostos e pontos de referência
+      // Detecta rostos e pontos de referência
       const detections1 = await faceapi.detectAllFaces(image1).withFaceLandmarks().withFaceDescriptors();
       const detections2 = await faceapi.detectAllFaces(image2).withFaceLandmarks().withFaceDescriptors();
 
       if (detections1.length > 0 && detections2.length > 0) {
-        // Vamos usar a primeira detecção em cada imagem
         const detection1 = detections1[0];
         const detection2 = detections2[0];
 
-        // Calcular a distância euclidiana entre as características faciais dos dois rostos
+        // Calcula a distância euclidiana entre as características faciais dos dois rostos
         const distance = faceapi.euclideanDistance(detection1.descriptor, detection2.descriptor);
 
-        // Definir um limiar para decidir se são a mesma pessoa
-        const threshold = 0.5; // Este é um valor de exemplo, ajuste conforme necessário
+        // Limiar para decidir se são a mesma pessoa
+        const threshold = 0.5;
 
-        // Exibir a distância euclidiana
         console.log('Distância Euclidiana:', distance);
 
-        // Comparar com o limiar
         if (distance < threshold) {
           alert('As faces são da mesma pessoa.');
         } else {
