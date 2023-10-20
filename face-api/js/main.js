@@ -1,80 +1,83 @@
-const webcam = document.querySelector('#webcam')
+// main.js
 
-let face1 = null;
-let face2 = null;
-let response = null;
-let arrayPreenchido = false;
+document.addEventListener('DOMContentLoaded', () => {
+  const inputImage1 = document.getElementById('inputImage1');
+  const imageDisplay1 = document.getElementById('imageDisplay1');
+  const inputImage2 = document.getElementById('inputImage2');
+  const imageDisplay2 = document.getElementById('imageDisplay2');
+  const compareBtn = document.getElementById('compareBtn');
+  const canvas = document.getElementById('canvas');
+  const context = canvas.getContext('2d');
 
-//Após todas as promises resolvidas starta o vídeo
-Promise.all([
+  let image1;
+  let image2;
 
-  faceapi.nets.tinyFaceDetector.loadFromUri('./models'), // Detecção
-  faceapi.nets.faceLandmark68Net.loadFromUri('./models'), // Pontos de referência do rosto
-  faceapi.nets.faceRecognitionNet.loadFromUri('./models'), // Localiza pessoas no vídeo
-  faceapi.nets.faceExpressionNet.loadFromUri('./models') // Expressões faciais
+  const loadAndDrawImage = (fileInput, imageDisplay) => {
+    const file = fileInput.files[0];
 
-]).then(StartWebCam)
+    if (file) {
+      const reader = new FileReader();
 
-async function StartWebCam() {
-  const constraints = { video: true };
+      reader.onload = function (e) {
+        const image = new Image();
+        image.src = e.target.result;
 
-  try {
-    let stream = await navigator.mediaDevices.getUserMedia(constraints);
+        imageDisplay.src = e.target.result;
+        imageDisplay.style.display = 'block';
 
-    webcam.srcObject = stream;
-    webcam.onloadedmetadata = e => {
-      webcam.play();
+        if (imageDisplay === imageDisplay1) {
+          image1 = image;
+        } else {
+          image2 = image;
+        }
+
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        context.drawImage(image, 0, 0, canvas.width, canvas.height);
+      };
+
+      reader.readAsDataURL(file);
     }
+  };
 
-  } catch (err) {
-    console.error(err);
-  }
-}
+  inputImage1.addEventListener('change', () => loadAndDrawImage(inputImage1, imageDisplay1));
+  inputImage2.addEventListener('change', () => loadAndDrawImage(inputImage2, imageDisplay2));
 
-webcam.addEventListener('play', () => {
+  compareBtn.addEventListener('click', async () => {
+    if (image1 && image2) {
+      // Certifique-se de que todos os modelos necessários sejam carregados
+      await faceapi.nets.ssdMobilenetv1.loadFromUri('./models');
+      await faceapi.nets.faceRecognitionNet.loadFromUri('./models');
+      await faceapi.nets.faceLandmark68Net.loadFromUri('./models');
 
-  const canvas = faceapi.createCanvasFromMedia(webcam) // Criando canvas para mostrar nossos resultador
-  document.body.append(canvas) // Adicionando canvas ao body
+      // Detectar rostos e pontos de referência
+      const detections1 = await faceapi.detectAllFaces(image1).withFaceLandmarks().withFaceDescriptors();
+      const detections2 = await faceapi.detectAllFaces(image2).withFaceLandmarks().withFaceDescriptors();
 
-  const displaySize = { width: webcam.width, height: webcam.height } // criando tamanho do display a partir das dimenssões da nossa webcam
+      if (detections1.length > 0 && detections2.length > 0) {
+        // Vamos usar a primeira detecção em cada imagem
+        const detection1 = detections1[0];
+        const detection2 = detections2[0];
 
-  faceapi.matchDimensions(canvas, displaySize) // Faz as dimensões do canvas serem iguais a da webcam
+        // Calcular a distância euclidiana entre as características faciais dos dois rostos
+        const distance = faceapi.euclideanDistance(detection1.descriptor, detection2.descriptor);
 
-  //setInterval faz as detecções serem de 0.1s a 0.1s
-  setInterval(async () => {
-    const detections = await faceapi.detectAllFaces(
-      webcam,
-      new faceapi.TinyFaceDetectorOptions() // Biblioteca que vamos usar para detecção
+        // Definir um limiar para decidir se são a mesma pessoa
+        const threshold = 0.5; // Este é um valor de exemplo, ajuste conforme necessário
 
-    )
-      .withFaceLandmarks() // Vai desenhar os pontos de marcação no rosto
+        // Exibir a distância euclidiana
+        console.log('Distância Euclidiana:', distance);
 
-    if (detections[0] != undefined && response === null) {
-      console.log(detections[0])
-      let response = detections[0].landmarks._positions;
-
-      if (face1 === null) {
-        face1 = [...response];
-      } else if (face2 === null) {
-        face2 = [...response];
+        // Comparar com o limiar
+        if (distance < threshold) {
+          alert('As faces são da mesma pessoa.');
+        } else {
+          alert('As faces não são da mesma pessoa.');
+        }
+      } else {
+        alert('Rosto não detectado em uma das imagens.');
       }
-
-      if (face1 != null && face2 != null && !arrayPreenchido) {
-        console.log(await faceapi.euclideanDistance(face1, face2));
-        arrayPreenchido = true;
-      }
+    } else {
+      alert('Carregue duas imagens antes de comparar.');
     }
-
-   // console.log(detections[0]["detection"]["_box"])
-    console.log(faceapi.euclideanDistance(detections[0]["detection"]["_box"]["_x"], detections[0]["detection"]["_box"]["_y"]))
-
-    const resizedDetections = faceapi.resizeResults(detections, displaySize) // Redimensionado as detecções
-
-
-    canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height) // Apagando nosso canvas antes de desenhar outro
-
-    faceapi.draw.drawDetections(canvas, resizedDetections) // Desenhando decções
-    faceapi.draw.drawFaceLandmarks(canvas, resizedDetections) // Desenhando os pontos de referencia
-
-  }, 100);
-})
+  });
+});
