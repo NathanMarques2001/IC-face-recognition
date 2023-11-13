@@ -1,0 +1,32 @@
+a {
+  text-decoration: none;
+  color: #FFFFFF;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+body {
+  background-color: rgb(206, 206, 206);
+}
+
+#div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+#div-input {
+  width: 30%;
+}
+
+#div-username {
+  width: 100%;
+  height: 80vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
