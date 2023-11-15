@@ -55,29 +55,12 @@ async function compareImages() {
     const detection = await faceapi.detectAllFaces(image).withFaceLandmarks().withFaceDescriptors();
 
     if (detection.length > 0) {
-
       const api = new ApiCalls();
       let detections = [];
+
       detection[0].descriptor.forEach(element => {
         detections.push(element);
       });
-      // let vetEuclideanDistances = [];
-      // let id;
-      // let euclideanDistance = 1;
-
-      // api.getAllVectors().then((vetoresFaciais) => {
-      //   vetoresFaciais.map((vetorFacial) => {
-      //     euclideanDistance = faceapi.euclideanDistance(detection[0].descriptor, vetorFacial.face_vector);
-      //     if (vetEuclideanDistances.length != 0 && vetEuclideanDistances[0] > euclideanDistance) {
-      //       vetEuclideanDistances.unshift(euclideanDistance);
-      //       id = vetorFacial.user_id;
-      //     } else if (vetEuclideanDistances.length == 0) {
-      //       vetEuclideanDistances.push(euclideanDistance);
-      //       id = vetorFacial.user_id;
-      //     }
-      //   });
-      //   findUser(id, vetEuclideanDistances[0]);
-      // });
 
       api.euclideanDistance(detections).then((euclideanDistance) => {
         const result = euclideanDistance.calcular_distancia_euclidiana;
