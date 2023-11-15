@@ -3,10 +3,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   const imageDisplay2 = document.getElementById('imageDisplay2');
   const compareBtn = document.getElementById('compareBtn');
   const resultTable = document.getElementById('resultTable');
-  const thresholds = [0.4, 0.5, 0.6, 0.425, 0.45, 0.475, 0.525, 0.55, 0.575, 0.5125, 0.525, 0.5375, 0.55, 0.55625, 0.5625];
+  const thresholds = [0.4, 0.5, 0.6, 0.425, 0.45, 0.475, 0.525, 0.55, 0.575, 0.5125, 0.5375, 0.55625, 0.5625];
   // Case 1: 0.4, 0.5, 0.6
   // Case 2: 0.425, 0.45, 0.475, 0.525, 0.55, 0.575
-  // Case 3: 0.5125, 0.525, 0.5375, 0.55, 0.55625, 0.5625
+  // Case 3: 0.5125, 0.5375, 0.55625, 0.5625
 
   let distance = 0;
   let tp = 0;
