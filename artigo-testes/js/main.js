@@ -3,8 +3,16 @@ document.addEventListener('DOMContentLoaded', async () => {
   const imageDisplay2 = document.getElementById('imageDisplay2');
   const compareBtn = document.getElementById('compareBtn');
   const resultTable = document.getElementById('resultTable');
+  const thresholds = [0.4, 0.5, 0.6, 0.425, 0.45, 0.475, 0.525, 0.55, 0.575, 0.5125, 0.525, 0.5375, 0.55, 0.55625, 0.5625];
+  // Case 1: 0.4, 0.5, 0.6
+  // Case 2: 0.425, 0.45, 0.475, 0.525, 0.55, 0.575
+  // Case 3: 0.5125, 0.525, 0.5375, 0.55, 0.55625, 0.5625
+
   let distance = 0;
-  const thresholds = [0.4, 0.45, 0.5, 0.55, 0.6];
+  let tp = 0;
+  let fp = 0;
+  let tn = 0;
+  let fn = 0;
   let rowCount = 1;
 
   const loadImage = async (imagePath) => {
@@ -23,14 +31,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       await loadFaceRecognitionModels();
 
       for (let i = 0; i < thresholds.length; i++) {
-
-        addRowToTable({
-          person1: thresholds[i],
-          person2: thresholds[i],
-          expectedOutput: thresholds[i],
-          result: thresholds[i],
-          euclideanDistance: thresholds[i]
-        });
+        tp = 0;
+        fp = 0;
+        tn = 0;
+        fn = 0;
 
         for (let j = 0; j < jsonData.length; j += 2) {
           const imagePath1 = jsonData[j];
@@ -41,20 +45,32 @@ document.addEventListener('DOMContentLoaded', async () => {
 
           displayImages(img1, img2);
 
+          console.log(rowCount++);
+
           try {
             const response = await compareImages(img1, img2, thresholds[i]);
+            tp += truePositive(extractName(imagePath1), extractName(imagePath2), response);
+            fp += falsePositive(extractName(imagePath1), extractName(imagePath2), response);
+            tn += trueNegative(extractName(imagePath1), extractName(imagePath2), response);
+            fn += falseNegative(extractName(imagePath1), extractName(imagePath2), response);
 
-            addRowToTable({
-              person1: extractName(imagePath1),
-              person2: extractName(imagePath2),
-              expectedOutput: comparesNames(extractName(imagePath1), extractName(imagePath2)),
-              result: response,
-              euclideanDistance: distance
-            });
           } catch (error) {
             console.error('Erro ao comparar imagens:', error);
           }
         }
+
+        addRowToTable({
+          threshold: thresholds[i],
+          tp: tp,
+          fp: fp,
+          tn: tn,
+          fn: fn,
+          precision: tp / (tp + fp),
+          recall: tp / (tp + fn),
+          tpr: tp / (tp + fn),
+          fpr: fp / (fp + tn)
+        });
+
       }
       alert('Todas as comparações foram concluídas.');
     } catch (error) {
@@ -92,12 +108,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const addRowToTable = (rowData) => {
     const newRow = resultTable.insertRow();
-    newRow.insertCell(0).textContent = rowCount++;
-    newRow.insertCell(1).textContent = rowData.person1;
-    newRow.insertCell(2).textContent = rowData.person2;
-    newRow.insertCell(3).textContent = rowData.expectedOutput;
-    newRow.insertCell(4).textContent = rowData.result;
-    newRow.insertCell(5).textContent = rowData.euclideanDistance;
+    newRow.insertCell(0).textContent = rowData.threshold;
+    newRow.insertCell(1).textContent = rowData.tp;
+    newRow.insertCell(2).textContent = rowData.fp;
+    newRow.insertCell(3).textContent = rowData.tn;
+    newRow.insertCell(4).textContent = rowData.fn;
+    newRow.insertCell(5).textContent = rowData.precision;
+    newRow.insertCell(6).textContent = rowData.recall;
+    newRow.insertCell(7).textContent = rowData.tpr;
+    newRow.insertCell(8).textContent = rowData.fpr;
   };
 
   const tableToCSV = () => {
@@ -107,12 +126,13 @@ document.addEventListener('DOMContentLoaded', async () => {
       const cols = rows[i].querySelectorAll('td,th');
       const csvrow = [];
       for (let j = 0; j < cols.length; j++) {
-        csvrow.push(cols[j].innerHTML);
+        csvrow.push(cols[j].textContent);
       }
       csv_data.push(csvrow.join(","));
     }
     downloadCSVFile(csv_data);
   };
+
 
   const downloadCSVFile = (csv_data) => {
     const CSVFile = new Blob([csv_data], { type: "text/csv" });
@@ -144,4 +164,32 @@ document.addEventListener('DOMContentLoaded', async () => {
   compareBtn.addEventListener('click', () => {
     loadImagesFromJson('./utils/caminhosFotos.json');
   });
+
+  const truePositive = (name1, name2, result) => {
+    if (name1 === name2 && result) {
+      return 1;
+    }
+    return 0;
+  }
+
+  const falsePositive = (name1, name2, result) => {
+    if (name1 !== name2 && result) {
+      return 1;
+    }
+    return 0;
+  }
+
+  const trueNegative = (name1, name2, result) => {
+    if (name1 !== name2 && !result) {
+      return 1;
+    }
+    return 0;
+  }
+
+  const falseNegative = (name1, name2, result) => {
+    if (name1 === name2 && !result) {
+      return 1;
+    }
+    return 0;
+  }
 });
