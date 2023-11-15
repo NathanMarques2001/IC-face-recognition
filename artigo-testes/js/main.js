@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         tn = 0;
         fn = 0;
 
-        for (let j = 0; j < jsonData.length; j += 2) {
+        for (let j = 0; j < jsonData.length - 1; j++) {
           const imagePath1 = jsonData[j];
           const imagePath2 = jsonData[j + 1];
 
