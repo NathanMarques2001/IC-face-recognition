@@ -77,7 +77,8 @@ async function compareImages() {
 }
 
 function findUser(id, euclideanDistance) {
-  if (euclideanDistance < 0.5) {
+  const threshold = 0.5625;
+  if (euclideanDistance < threshold) {
     const api = new ApiCalls();
     api.getUser(id).then((user) => {
       window.location.href = `../pages/isLogged.html?username=${user.name}&id=${user.id}&euclideanDistance=${euclideanDistance}`;
