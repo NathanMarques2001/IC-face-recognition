@@ -1,8 +1,8 @@
-# Reconhecimento Facial com TensorFlow.js e Face API 🚀
+# Reconhecimento Facial com TensorFlow.js e Face API 👨👩
 
 Este projeto visa desenvolver um sistema de reconhecimento facial utilizando os modelos pré-treinados do TensorFlow.js e a biblioteca Face API. O objetivo é criar uma solução eficaz e acessível, com foco na implementação direta no front end.
 
-## Sumário
+## Sumário 🔖
 
 - [Objetivo](#objetivo-)
 - [Tecnologias Utilizadas](#tecnologias-utilizadas-%EF%B8%8F)
