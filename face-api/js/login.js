@@ -69,10 +69,10 @@ async function compareImages() {
         findUser(id, distance);
       });
     } else {
-      console.log('Nenhum rosto detectado.');
+      alert('Nenhum rosto detectado.');
     }
   } else {
-    console.log('Imagem não encontrada.');
+    alert('Ocorreu um erro ao fazer a autenticação. Tente novamente!');
   }
 }
 
@@ -84,6 +84,6 @@ function findUser(id, euclideanDistance) {
       window.location.href = `../pages/isLogged.html?username=${user.name}&id=${user.id}&euclideanDistance=${euclideanDistance}`;
     });
   } else {
-    console.log('Usuário não encontrado.');
+    alert('Usuário não encontrado.');
   }
 }

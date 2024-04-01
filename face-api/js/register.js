@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (name && image) {
       createUser(name, image);
     } else {
-      console.log('Nome ou imagem não encontrados.');
+      alert('Nome ou foto não encontrados.');
     }
   });
 });
@@ -62,8 +62,7 @@ function createUser(name, image) {
       detections.push(element);
     });
     api.createVector(user.id, detections).then(() => {
-      console.log('Usuário cadastrado com sucesso.');
-      alert('foi')
+      alert('Usuário cadastrado com sucesso.');
     });
   });
 }

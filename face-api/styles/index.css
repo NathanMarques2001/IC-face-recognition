@@ -1,5 +1,5 @@
 body{
-  background-color: rgb(206, 206, 206);
+  background-color: #2b245a;
 }
 
 #div-btn-index{
@@ -10,4 +10,12 @@ body{
   justify-content: center;
   align-items: center;
   gap: 5%;
+}
+
+#div-btn-img{
+  display: flex;
+}
+
+#img {
+  width: 65%;
 }
