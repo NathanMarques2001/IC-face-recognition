@@ -54,7 +54,7 @@ O sistema de reconhecimento facial utiliza a distância euclidiana entre os pont
 
 Aqui está um exemplo do vetor de características da face armazenado no banco de dados:
 
-![Banco de Dados]()
+![Banco de Dados](https://github.com/NathanMarques2001/IC-face-recognition/blob/main/assets/db.png)
 
 Cada valor no vetor representa uma característica específica da face, como a posição dos olhos, nariz e boca.
 
@@ -69,19 +69,19 @@ Cada valor no vetor representa uma característica específica da face, como a p
 Aqui estão algumas capturas de tela das telas principais do sistema:
 
 1. **Página Principal:**
-   ![Página Principal]()
+   ![Página Principal](https://github.com/NathanMarques2001/IC-face-recognition/blob/main/assets/home.png)
 
 2. **Página de Cadastro:**
-   ![Página de Cadastro]()
+   ![Página de Cadastro](https://github.com/NathanMarques2001/IC-face-recognition/blob/main/assets/signup.png)
 
 3. **Usuário Cadastrado:**
-   ![Usuário Cadastrado]()
+   ![Usuário Cadastrado](https://github.com/NathanMarques2001/IC-face-recognition/blob/main/assets/signup-success.png)
 
 4. **Página de Login:**
-   ![Página de Login]()
+   ![Página de Login](https://github.com/NathanMarques2001/IC-face-recognition/blob/main/assets/login.png)
 
 5. **Página Logado**
-   ![Página Principal]()
+   ![Página Principal](https://github.com/NathanMarques2001/IC-face-recognition/blob/main/assets/logged.png)
 
 ## Licença 📝
 
