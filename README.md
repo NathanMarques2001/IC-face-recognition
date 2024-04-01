@@ -2,6 +2,18 @@
 
 Este projeto visa desenvolver um sistema de reconhecimento facial utilizando os modelos pré-treinados do TensorFlow.js e a biblioteca Face API. O objetivo é criar uma solução eficaz e acessível, com foco na implementação direta no front end.
 
+## Sumário
+
+- [Objetivo](#objetivo)
+- [Tecnologias Utilizadas](#tecnologias-utilizadas)
+- [Como Começar](#como-começar)
+- [Como Funciona o Sistema](#como-funciona-o-sistema)
+- [Demonstração do Vetor da Face Armazenado](#demonstração-do-vetor-da-face-armazenado)
+- [Funcionalidades](#funcionalidades)
+- [Telas do Sistema](#telas-do-sistema)
+- [Licença](#licença)
+- [Contato](#contato)
+
 ## Objetivo 🎯
 
 O objetivo principal é criar um algoritmo de reconhecimento facial que seja economicamente viável e capaz de ser executado em dispositivos com processadores menos potentes, sem comprometer a precisão. Isso possibilitará a aplicabilidade do sistema em diversos contextos, desde que haja uma conexão estável disponível.
@@ -20,7 +32,7 @@ Principais ferramentas e linguagens empregadas:
 
 ## Como Começar 🚀
 
-### Rodando o Projeto
+Para começar com este projeto, siga as etapas abaixo:
 
 1. **Clonar o repositório:**
     
