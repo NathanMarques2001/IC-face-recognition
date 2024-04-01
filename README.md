@@ -4,15 +4,15 @@ Este projeto visa desenvolver um sistema de reconhecimento facial utilizando os 
 
 ## Sumário
 
-- [Objetivo](#objetivo)
-- [Tecnologias Utilizadas](#tecnologias-utilizadas)
-- [Como Começar](#como-começar)
-- [Como Funciona o Sistema](#como-funciona-o-sistema)
-- [Demonstração do Vetor da Face Armazenado](#demonstração-do-vetor-da-face-armazenado)
-- [Funcionalidades](#funcionalidades)
-- [Telas do Sistema](#telas-do-sistema)
-- [Licença](#licença)
-- [Contato](#contato)
+- [Objetivo](#objetivo-)
+- [Tecnologias Utilizadas](#tecnologias-utilizadas-%EF%B8%8F)
+- [Como Começar](#como-começar-)
+- [Como Funciona o Sistema](#como-funciona-o-sistema-)
+- [Demonstração do Vetor da Face Armazenado](#demonstração-do-vetor-da-face-armazenado-)
+- [Funcionalidades](#funcionalidades-%EF%B8%8F)
+- [Telas do Sistema](#telas-do-sistema-)
+- [Licença](#licença-)
+- [Contato](#contato-%EF%B8%8F)
 
 ## Objetivo 🎯
 
